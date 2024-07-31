@@ -50,9 +50,7 @@ sudo ./install.sh -r -t yinlin
  - Make sure you have `imagemagick` installed, or at least something that provides `convert`
  - Find the resolution of your display, and make sure your background matches the resolution
    - 1920x1080 >> 1080p
-   - 2560x1080 >> ultrawide
    - 2560x1440 >> 2k
-   - 3440x1440 >> ultrawide2k
    - 3840x2160 >> 4k
  - Place your custom background inside the root of the project, and name it `background.jpg`
  - Run the installer like normal, but with -s `[YOUR_RESOLUTION]` and -t `[THEME]` and -i `[ICON]`
@@ -63,7 +61,7 @@ sudo ./install.sh -r -t yinlin
    - Delete the existing icon, if there is one
    - Run `cd assets; ./render-all.sh`
  - Create a pull request from your branch or fork
- - If any issues occur, report then to the [issue](https://github.com/vinceliuice/grub2-themes/issues) page
+ - If any issues occur, report then to the [issue](issues) page
 
 ## Preview:
 ![preview](preview.jpg?raw=true)
