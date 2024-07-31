@@ -8,10 +8,7 @@ Usage:  `sudo ./install.sh [OPTIONS...]`
   -t, --theme     Background theme variant(s) [changli|jinxi|jiyan|yinlin|anke|weilinai|kakaluo|jianxin] (default is changli)
   -s, --screen    Screen display variant(s)   [1080p|2k|4k] (default is 1080p)
   -r, --remove    Remove/Uninstall theme      [changli|jinxi|jiyan|yinlin|anke|weilinai|kakaluo|jianxin] (must add theme name option, default is changli)
-
   -b, --boot      install theme into '/boot/grub' or '/boot/grub2'
-  -g, --generate  do not install but generate theme into chosen directory (must add your directory)
-
   -h, --help      Show this help
 ```
 
