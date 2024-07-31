@@ -101,7 +101,7 @@ generate() {
   # Don't preserve ownership because the owner will be root, and that causes the script to crash if it is ran from terminal by sudo
   cp -a --no-preserve=ownership "${REO_DIR}/common/"{*.png,*.pf2} "${THEME_DIR}"
   cp -a --no-preserve=ownership "${REO_DIR}/config/theme-${screen}.txt" "${THEME_DIR}/theme.txt"
-  cp -a --no-preserve=ownership "${REO_DIR}/backgrounds/background-${theme}-${screen}.jpg" "${THEME_DIR}/background.jpg"
+  cp -a --no-preserve=ownership "${REO_DIR}/backgrounds/background-${theme}.jpg" "${THEME_DIR}/background.jpg"
   cp -a --no-preserve=ownership "${REO_DIR}/assets/assets-icons/icons-${screen}" "${THEME_DIR}/icons"
   cp -a --no-preserve=ownership "${REO_DIR}/assets/assets-other/other-${screen}/"*.png "${THEME_DIR}"
 
@@ -268,11 +268,11 @@ run_dialog() {
 
     tui=$(dialog --backtitle ${Project_Name} \
     --radiolist "Choose your Grub theme background picture : " 15 40 5 \
-      1 "Changli Theme" off  \
-      2 "Jinxi Theme" on \
+      1 "Changli Theme" on  \
+      2 "Jinxi Theme" off \
       3 "Jiyan Theme" off  \
       4 "Yinlin Theme" off  \
-      5 "Anke Theme" on \
+      5 "Anke Theme" off \
       6 "Weilinai Theme" off  \
       7 "Kakaluo Theme" off  \
       8 "Jianxin Theme" off --output-fd 1 )
