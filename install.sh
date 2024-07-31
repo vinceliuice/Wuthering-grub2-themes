@@ -67,60 +67,44 @@ Usage: $0 [OPTION]...
 OPTIONS:
   -t, --theme     Background theme variant(s) [changli|jinxi|jiyan|yinlin|anke|weilinai|kakaluo|jianxin] (default is changli)
   -s, --screen    Screen display variant(s) [1080p|2k|4k] (default is 1080p)
+  -b, --boot      Install theme into '/boot/grub' or '/boot/grub2'
+
   -r, --remove    Remove/Uninstall theme
-
-  -b, --boot      install theme into '/boot/grub' or '/boot/grub2'
-  -g, --generate  do not install but generate theme into chosen directory (must add your directory)
-
   -h, --help      Show this help
 
 EOF
 }
 
-generate() {
-  if [[ "${install_boot}" == 'true' ]]; then
-    if [[ -d "/boot/grub" ]]; then
-      THEME_DIR="/boot/grub/themes/${THEME_NAME}-${theme}"
-    fi
-    if [[ -d "/boot/grub2" ]]; then
-      THEME_DIR="/boot/grub2/themes/${THEME_NAME}-${theme}"
-    fi
-  else
-    THEME_DIR="${GRUB_DIR}/${THEME_NAME}-${theme}"
-  fi
-
-  # Make a themes directory if it doesn't exist
-  prompt -i "\n Checking for the existence of themes directory..."
-
-  [[ -d "${THEME_DIR}" ]] && rm -rf "${THEME_DIR}"
-  mkdir -p "${THEME_DIR}"
-
-  # Copy theme
-  prompt -i "\n Installing Wuthering-${theme} ${screen} theme..."
-
-  # Don't preserve ownership because the owner will be root, and that causes the script to crash if it is ran from terminal by sudo
-  cp -a --no-preserve=ownership "${REO_DIR}/common/"{*.png,*.pf2} "${THEME_DIR}"
-  cp -a --no-preserve=ownership "${REO_DIR}/config/theme-${screen}.txt" "${THEME_DIR}/theme.txt"
-  cp -a --no-preserve=ownership "${REO_DIR}/backgrounds/background-${theme}.jpg" "${THEME_DIR}/background.jpg"
-  cp -a --no-preserve=ownership "${REO_DIR}/assets/assets-icons/icons-${screen}" "${THEME_DIR}/icons"
-  cp -a --no-preserve=ownership "${REO_DIR}/assets/assets-other/other-${screen}/"*.png "${THEME_DIR}"
-
-  # Use custom background.jpg as grub background image
-  if [[ -f "${REO_DIR}/background.jpg" ]]; then
-    prompt -w "\n Using custom background.jpg as grub background image..."
-    cp -a --no-preserve=ownership "${REO_DIR}/background.jpg" "${THEME_DIR}/background.jpg"
-    convert -auto-orient "${THEME_DIR}/background.jpg" "${THEME_DIR}/background.jpg"
-  fi
-}
-
 install() {
-  local theme=${1}
-  local screen=${2}
+  local theme="${1}"
+  local screen="${2}"
+
+  THEME_DIR="${GRUB_DIR}/${THEME_NAME}-${theme}"
 
   # Check for root access and proceed if it is present
   if [[ "$UID" -eq "$ROOT_UID" ]]; then
-    # Generate the theme in "/usr/share/grub/themes"
-    generate "${theme}" "${screen}"
+    # Make a themes directory if it doesn't exist
+    prompt -i "\n Checking themes directory ${THEME_DIR} ..."
+
+    [[ -d "${THEME_DIR}" ]] && rm -rf "${THEME_DIR}"
+    mkdir -p "${THEME_DIR}"
+
+    # Copy theme
+    prompt -i "\n Installing Wuthering-${theme} ${screen} ..."
+
+    # Don't preserve ownership because the owner will be root, and that causes the script to crash if it is ran from terminal by sudo
+    cp -a --no-preserve=ownership "${REO_DIR}/common/"*.pf2 "${THEME_DIR}"
+    cp -a --no-preserve=ownership "${REO_DIR}/config/theme-${screen}.txt" "${THEME_DIR}/theme.txt"
+    cp -a --no-preserve=ownership "${REO_DIR}/backgrounds/background-${theme}.jpg" "${THEME_DIR}/background.jpg"
+    cp -a --no-preserve=ownership "${REO_DIR}/assets/assets-icons/icons-${screen}" "${THEME_DIR}/icons"
+    cp -a --no-preserve=ownership "${REO_DIR}/assets/assets-other/other-${screen}/"*.png "${THEME_DIR}"
+
+    # Use custom background.jpg as grub background image
+    if [[ -f "${REO_DIR}/background.jpg" ]]; then
+      prompt -w "\n Using custom background.jpg as grub background image..."
+      cp -a --no-preserve=ownership "${REO_DIR}/background.jpg" "${THEME_DIR}/background.jpg"
+      convert -auto-orient "${THEME_DIR}/background.jpg" "${THEME_DIR}/background.jpg"
+    fi
 
     # Set theme
     prompt -i "\n Setting Wuthering as default..."
@@ -356,8 +340,10 @@ install_dialog() {
 remove() {
   local theme=${1}
 
+  THEME_DIR="${GRUB_DIR}/${THEME_NAME}-${theme}"
+
   # Check for root access and proceed if it is present
-  if [ "$UID" -eq "$ROOT_UID" ]; then
+  if [[ "$UID" -eq "$ROOT_UID" ]]; then
     prompt -i "Checking for the existence of themes directory..."
     if [[ -d "${THEME_DIR}" ]]; then
       prompt -i "\n Find installed theme: '${THEME_DIR}'..."
@@ -435,7 +421,7 @@ remove() {
 
 dialog_installer() {
   if [[ ! -x /usr/bin/dialog ]];  then
-    if [[ $UID -ne $ROOT_UID ]];  then
+    if [[ "$UID" -ne "$ROOT_UID" ]];  then
       #Check if password is cached (if cache timestamp not expired yet)
 
       if sudo -n true 2> /dev/null && echo; then
@@ -467,8 +453,6 @@ dialog_installer() {
 #######################################################
 #   :::::: A R G U M E N T   H A N D L I N G ::::::   #
 #######################################################
-
-install=install
 
 while [[ $# -gt 0 ]]; do
   PROG_ARGS+=("${1}")
@@ -522,14 +506,13 @@ while [[ $# -gt 0 ]]; do
         esac
       done
       ;;
-    -g|--generate)
-      shift 1
-      THEME_DIR="${1}"
-      install=generate
-      shift 1
-      ;;
     -b|--boot)
       install_boot='true'
+      if [[ -d "/boot/grub" ]]; then
+        GRUB_DIR="/boot/grub/themes"
+      elif [[ -d "/boot/grub2" ]]; then
+        GRUB_DIR="/boot/grub2/themes"
+      fi
       shift 1
       ;;
     -t|--theme)
@@ -635,7 +618,7 @@ if [[ "${dialog:-}" == 'false' ]]; then
   if [[ "${remove:-}" != 'true' ]]; then
     for theme in "${themes[@]}"; do
       for screen in "${screens[@]}"; do
-        $install "${theme}" "${screen}"
+        install "${theme}" "${screen}"
       done
     done
   elif [[ "${remove:-}" == 'true' ]]; then
