@@ -126,6 +126,14 @@ install() {
           #Append GRUB_FONT
           echo "GRUB_FONT=/boot/grub2/fonts/unicode.pf2" >> /etc/default/grub
         fi
+      elif [[ -f "/boot/efi/EFI/fedora/fonts/unicode.pf2" ]]; then
+        if grep "GRUB_FONT=" /etc/default/grub 2>&1 >/dev/null; then
+          #Replace GRUB_FONT
+          sed -i "s|.*GRUB_FONT=.*|GRUB_FONT=/boot/efi/EFI/fedora/fonts/unicode.pf2|" /etc/default/grub
+        else
+          #Append GRUB_FONT
+          echo "GRUB_FONT=/boot/efi/EFI/fedora/fonts/unicode.pf2" >> /etc/default/grub
+        fi
       fi
     fi
 
@@ -271,8 +279,6 @@ run_dialog() {
         *) operation_canceled ;;
      esac
 
-    clear
-
     tui=$(dialog --backtitle ${Project_Name} \
     --radiolist "Choose your Display Resolution : " 15 40 5 \
       1 "1080p (1920x1080)" on  \
@@ -285,7 +291,8 @@ run_dialog() {
         *) operation_canceled   ;;
      esac
 
-     clear
+     # clear
+     echo -e '\0033\0143'
   fi
 }
 
@@ -303,9 +310,13 @@ updating_grub() {
   elif has_command zypper || has_command transactional-update; then
     grub2-mkconfig -o /boot/grub2/grub.cfg
   # Check for Fedora (regular or Atomic)
-  elif has_command dnf || has_command rpm-ostree; then 
-    #Check for BIOS
-    if [[ -f /boot/grub2/grub.cfg ]]; then
+  elif has_command dnf || has_command rpm-ostree; then
+    # Check for UEFI
+    if [[ -f /boot/efi/EFI/fedora/grub.cfg ]]; then
+      prompt -s "Find config file on /boot/efi/EFI/fedora/grub.cfg ...\n"
+      grub2-mkconfig -o /boot/efi/EFI/fedora/grub.cfg
+    # Check for BIOS
+    elif [[ -f /boot/grub2/grub.cfg ]]; then
       prompt -s "Find config file on /boot/grub2/grub.cfg ...\n"
       grub2-mkconfig -o /boot/grub2/grub.cfg
     fi
