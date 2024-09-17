@@ -46,6 +46,7 @@ nixos
 gpart
 ubuntuDDE
 archcraft
+chimera
 brunch
 
 recovery
