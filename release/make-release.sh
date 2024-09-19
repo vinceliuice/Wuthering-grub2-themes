@@ -39,7 +39,7 @@ cd ..
 for theme in "${themes[@]}"; do
   for screen in "${screens[@]}"; do
     ./generate.sh -d "$OPEN_DIR/${THEME_NAME}-${theme}-grub-theme/${screen}" -t "${theme}" -s "${screen}"
-    cp -rf "$OPEN_DIR"/install_shell "$OPEN_DIR/${THEME_NAME}-${theme}-grub-theme/${screen}"/install.sh
+    cp -rf "$OPEN_DIR"/install "$OPEN_DIR/${THEME_NAME}-${theme}-grub-theme/${screen}"/install.sh
     sed -i "s/grub_theme_name/${THEME_NAME}-${theme}/g" "$OPEN_DIR/${THEME_NAME}-${theme}-grub-theme/${screen}"/install.sh
   done
 done
