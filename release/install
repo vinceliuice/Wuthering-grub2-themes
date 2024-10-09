@@ -76,11 +76,19 @@ if [ "$UID" -eq "$ROOT_UID" ]; then
     update-grub
   elif has_command grub-mkconfig; then
     grub-mkconfig -o /boot/grub/grub.cfg
-  elif has_command grub2-mkconfig; then
-    if has_command zypper; then
-      grub2-mkconfig -o /boot/grub2/grub.cfg
-    elif has_command dnf; then
+  # Check for OpenSuse (regular or microOS)
+  elif has_command zypper || has_command transactional-update; then
+    grub2-mkconfig -o /boot/grub2/grub.cfg
+  # Check for Fedora (regular or Atomic)
+  elif has_command dnf || has_command rpm-ostree; then
+    # Check for UEFI
+    if [[ -f /boot/efi/EFI/fedora/grub.cfg ]]; then
+      prompt -s "Find config file on /boot/efi/EFI/fedora/grub.cfg ...\n"
       grub2-mkconfig -o /boot/efi/EFI/fedora/grub.cfg
+    # Check for BIOS
+    elif [[ -f /boot/grub2/grub.cfg ]]; then
+      prompt -s "Find config file on /boot/grub2/grub.cfg ...\n"
+      grub2-mkconfig -o /boot/grub2/grub.cfg
     fi
   fi
 

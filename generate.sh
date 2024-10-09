@@ -75,7 +75,7 @@ generate() {
   local theme="${2}"
   local screen="${3}"
 
-  THEME_DIR="${1}/${THEME_NAME}-${2}"
+  local THEME_DIR="${1}/${THEME_NAME}-${2}"
 
   # Make a themes directory if it doesn't exist
   prompt -i "\n Checking themes directory ${THEME_DIR} ..."
